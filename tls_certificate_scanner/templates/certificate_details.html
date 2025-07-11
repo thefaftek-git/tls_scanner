@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Details - {{ cert_data.domain }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .cert-info {
+            margin-top: 20px;
+        }
+        .cert-info div {
+            margin-bottom: 15px;
+        }
+        .cert-info label {
+            display: inline-block;
+            width: 200px;
+            font-weight: bold;
+            color: #555;
+        }
+        .cert-info pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #2196F3;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Certificate Details for {{ cert_data.domain }}</h1>
+
+        <div class="cert-info">
+            {% if cert_data.valid %}
+                <div>
+                    <label>Subject:</label>
+                    <pre>{{ cert_data.subject }}</pre>
+                </div>
+                <div>
+                    <label>Issuer:</label>
+                    <pre>{{ cert_data.issuer }}</pre>
+                </div>
+                <div>
+                    <label>Serial Number:</label>
+                    <pre>{{ cert_data.serial_number }}</pre>
+                </div>
+                <div>
+                    <label>Valid From:</label>
+                    <pre>{{ cert_data.not_before }}</pre>
+                </div>
+                <div>
+                    <label>Valid Until:</label>
+                    <pre>{{ cert_data.not_after }}</pre>
+                </div>
+                <div>
+                    <label>Signature Hash Algorithm:</label>
+                    <pre>{{ cert_data.signature_hash_algorithm }}</pre>
+                </div>
+                <div>
+                    <label>Subject Alternative Names (SANs):</label>
+                    <pre>{% for san in cert_data.sans %}{{ san }}<br>{% endfor %}</pre>
+                </div>
+                <div>
+                    <label>CRL Distribution Points:</label>
+                    <pre>{% for crl in cert_data.crl_dp %}{{ crl }}<br>{% endfor %}</pre>
+                </div>
+            {% else %}
+                <div>
+                    <label>Error:</label>
+                    <pre>{{ cert_data.error }}</pre>
+                </div>
+            {% endif %}
+        </div>
+
+        <a href="/" class="back-link">Back to Domain List</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TLS Certificate Scanner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .domain-list {
+            margin-top: 20px;
+        }
+        .domain-item {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 5px solid #4CAF50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .domain-item.expired {
+            border-left-color: #f44336;
+        }
+        .domain-item.warning {
+            border-left-color: #ff9800;
+        }
+        .domain-item .info {
+            flex-grow: 1;
+        }
+        .domain-item .actions {
+            display: flex;
+            gap: 10px;
+        }
+        .domain-item .url {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .domain-item .details {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .domain-item .expiry {
+            color: #333;
+            font-weight: bold;
+        }
+        .add-domain {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .add-domain input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+        }
+        .add-domain button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+        .add-domain button:hover {
+            background-color: #45a049;
+        }
+        .scan-all {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .scan-all button {
+            padding: 8px 15px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .scan-all button:hover {
+            background-color: #0b7dda;
+        }
+        .button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .button.scan {
+            background-color: #2196F3;
+        }
+        .button.scan:hover {
+            background-color: #0b7dda;
+        }
+        .button.remove {
+            background-color: #f44336;
+        }
+        .button.remove:hover {
+            background-color: #d32f2f;
+        }
+        .button.details {
+            background-color: #9C27B0;
+        }
+        .button.details:hover {
+            background-color: #7B1FA2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TLS Certificate Scanner</h1>
+
+        <div class="add-domain">
+            <form action="/add" method="post">
+                <input type="text" name="url" placeholder="Enter domain (e.g., example.com)" required>
+                <button type="submit">Add Domain</button>
+            </form>
+        </div>
+
+        <div class="domain-list">
+            {% for domain in domains %}
+                <div class="domain-item {% if domain.days_until_expiry is not none and domain.days_until_expiry < 30 %}warning{% elif domain.days_until_expiry is not none and domain.days_until_expiry < 0 %}expired{% endif %}">
+                    <div class="info">
+                        <div class="url">{{ domain.url }}</div>
+                        <div class="details">
+                            Last scan: {{ domain.last_scan.strftime('%Y-%m-%d %H:%M:%S') if domain.last_scan else 'Never' }}
+                            <br>
+                            Expires: {{ domain.expires_at.strftime('%Y-%m-%d %H:%M:%S') if domain.expires_at else 'Unknown' }}
+                            {% if domain.days_until_expiry is not none %}
+                                <br>
+                                Days until expiry: {{ domain.days_until_expiry }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <form action="/scan/{{ domain.id }}" method="post" style="display:inline;">
+                            <button type="submit" class="button scan">Scan Now</button>
+                        </form>
+                        <a href="/certificate/{{ domain.id }}" class="button details">Details</a>
+                        <form action="/remove/{{ domain.id }}" method="post" style="display:inline;" onclick="return confirm('Are you sure you want to remove this domain?')">
+                            <button type="submit" class="button remove">Remove</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="scan-all">
+            <form action="/scan_all" method="post">
+                <button type="submit">Scan All Domains</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
